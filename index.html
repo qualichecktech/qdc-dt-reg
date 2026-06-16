@@ -1059,12 +1059,25 @@ function applyRatio(){
 // ─────────────────────────────────────────────────────────
 let stream = null;
 
-async function initCamera(){
+async function initCamera(facing){
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode:"user", width:1280, height:960 }, audio:false });
+    if(stream) stopCamera();
+    const desired = facing || S.cameraFacing || 'user';
+    const constraints = { video: { facingMode: { ideal: desired }, width:1280, height:960 }, audio:false };
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
+    S.cameraFacing = desired;
     document.getElementById("camVideo").srcObject = stream;
+    document.getElementById("camStatusMsg").textContent = "";
   } catch(e){
-    document.getElementById("camStatusMsg").textContent = "Camera unavailable — use Upload instead.";
+    // Fallback: try without facingMode
+    try {
+      if(stream) stopCamera();
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width:1280, height:960 }, audio:false });
+      document.getElementById("camVideo").srcObject = stream;
+      document.getElementById("camStatusMsg").textContent = "";
+    } catch(err){
+      document.getElementById("camStatusMsg").textContent = "Camera unavailable — use Upload instead.";
+    }
   }
 }
 
@@ -1302,6 +1315,15 @@ window.addEventListener("load", () => {
   
   // Set initial button state
   updateSubmitButtonState();
+  
+  // Flip camera button handler
+  const flipBtn = document.getElementById("flipCamBtn");
+  if(flipBtn){
+    flipBtn.addEventListener("click", async () => {
+      const newFacing = (S.cameraFacing === 'user') ? 'environment' : 'user';
+      await initCamera(newFacing);
+    });
+  }
   
   runSplash();
 });
