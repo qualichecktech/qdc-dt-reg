@@ -562,7 +562,7 @@ body{
         <div class="form-grid g2 reg-field">
           <div class="field">
             <label>Registration # <span class="req">*</span></label>
-            <input id="fRegNum" type="text"/>
+            <input id="fRegNum" type="text" inputmode="numeric" maxlength="3" pattern="\d{3}" />
           </div>
         </div>
       </div>
@@ -1147,7 +1147,10 @@ function validateForm(){
   const department = document.getElementById("fDept").value.trim();
   const hasImage = S.imageBase64 !== "";
 
-  return regNumber && lastName && firstName && address && birthday && sex && 
+  // Registration must be exactly 3 digits
+  const regOk = /^\d{3}$/.test(regNumber);
+
+  return regOk && lastName && firstName && address && birthday && sex && 
          civilStatus && validId && idNumber && company && department && hasImage;
 }
 
@@ -1194,6 +1197,12 @@ async function doSubmit(){
 
   for(const [key,label] of required){
     if(!fields[key]){ showToast(`Please fill in: ${label}`, "error"); return; }
+  }
+
+  // Ensure registration is numeric and exactly 3 digits
+  if(!/^\d{3}$/.test(fields.regNumber)){
+    showToast("Registration # must be exactly 3 digits.", "error");
+    return;
   }
 
   showSubmitOverlay(true, "Saving registration…");
@@ -1253,6 +1262,24 @@ window.addEventListener("load", () => {
   initAC("fValidId", "acValidId", () => S.validIds);
   initAC("fCompany", "acCompany", () => S.companies);
   initAC("fDept",    "acDept",    () => S.depts);
+  
+  // Restrict registration input to digits only and maximum 3 characters
+  const regEl = document.getElementById("fRegNum");
+  if(regEl){
+    regEl.setAttribute("inputmode","numeric");
+    regEl.setAttribute("maxlength","3");
+    regEl.addEventListener("input", () => {
+      const v = regEl.value.replace(/\D/g,'').slice(0,3);
+      if(regEl.value !== v) regEl.value = v;
+      updateSubmitButtonState();
+    });
+    regEl.addEventListener("paste", e => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,3);
+      document.execCommand('insertText', false, text);
+      updateSubmitButtonState();
+    });
+  }
   
   // Add validation listeners to all form fields
   const formInputs = ["fRegNum","fLast","fFirst","fAddress","fBday","fCivil","fValidId","fIdNum","fCompany","fDept"];
