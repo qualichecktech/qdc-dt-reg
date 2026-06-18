@@ -572,7 +572,7 @@ body{
         <div class="form-grid g2 reg-field">
           <div class="field">
             <label>Registration # <span class="req">*</span></label>
-            <input id="fRegNum" type="text" inputmode="numeric" maxlength="3" pattern="\d{3}" />
+            <input id="fRegNum" type="text" inputmode="numeric" maxlength="3" pattern="\d{4}" />
           </div>
         </div>
       </div>
@@ -804,10 +804,11 @@ const BARANGAYS = [
   "G.S.I.S., San Pedro, Laguna","Landayan, San Pedro, Laguna","Langgam, San Pedro, Laguna",
   "Laram, San Pedro, Laguna","Magsaysay, San Pedro, Laguna","Maharlika, San Pedro, Laguna",
   "Narra, San Pedro, Laguna","Nueva, San Pedro, Laguna","Pacita I, San Pedro, Laguna",
-  "Pacita II, San Pedro, Laguna","Palatiw, San Pedro, Laguna","Sampaguita, San Pedro, Laguna",
-  "San Antonio, San Pedro, Laguna","San Lorenzo, San Pedro, Laguna","San Roque, San Pedro, Laguna",
-  "San Vicente, San Pedro, Laguna","Santa Cruz, San Pedro, Laguna","Santo Niño, San Pedro, Laguna",
+  "Pacita II, San Pedro, Laguna","Sampaguita, San Pedro, Laguna",
+  "San Antonio, San Pedro, Laguna","San Lorenzo Ruiz, San Pedro, Laguna","San Roque, San Pedro, Laguna",
+  "San Vicente, San Pedro, Laguna","Santo Niño, San Pedro, Laguna",
   "United Bayanihan, San Pedro, Laguna","United Better Living, San Pedro, Laguna",
+  "Poblacion, San Pedro, Laguna", "Rosario, San Pedro, Laguna", "Riverside, San Pedro, Laguna",
   "Balibago, Sta. Rosa, Laguna","Caingin, Sta. Rosa, Laguna","Dila, Sta. Rosa, Laguna",
   "Dita, Sta. Rosa, Laguna","Don Jose, Sta. Rosa, Laguna","Ibaba, Sta. Rosa, Laguna",
   "Kanluran (Pob.), Sta. Rosa, Laguna","Labas, Sta. Rosa, Laguna","Macabling, Sta. Rosa, Laguna",
@@ -1177,8 +1178,8 @@ function validateForm(){
   const department = document.getElementById("fDept").value.trim();
   const hasImage = S.imageBase64 !== "";
 
-  // Registration must be exactly 3 digits
-  const regOk = /^\d{3}$/.test(regNumber);
+  // Registration must be exactly 4 digits
+  const regOk = /^\d{4}$/.test(regNumber);
 
   return regOk && lastName && firstName && address && birthday && sex && 
          civilStatus && validId && idNumber && company && department && hasImage;
@@ -1229,9 +1230,9 @@ async function doSubmit(){
     if(!fields[key]){ showToast(`Please fill in: ${label}`, "error"); return; }
   }
 
-  // Ensure registration is numeric and exactly 3 digits
-  if(!/^\d{3}$/.test(fields.regNumber)){
-    showToast("Registration # must be exactly 3 digits.", "error");
+  // Ensure registration is numeric and exactly 4 digits
+  if(!/^\d{4}$/.test(fields.regNumber)){
+    showToast("Registration # must be exactly 4 digits.", "error");
     return;
   }
 
@@ -1293,19 +1294,19 @@ window.addEventListener("load", () => {
   initAC("fCompany", "acCompany", () => S.companies);
   initAC("fDept",    "acDept",    () => S.depts);
   
-  // Restrict registration input to digits only and maximum 3 characters
+  // Restrict registration input to digits only and maximum 4 characters
   const regEl = document.getElementById("fRegNum");
   if(regEl){
     regEl.setAttribute("inputmode","numeric");
-    regEl.setAttribute("maxlength","3");
+    regEl.setAttribute("maxlength","4");
     regEl.addEventListener("input", () => {
-      const v = regEl.value.replace(/\D/g,'').slice(0,3);
+      const v = regEl.value.replace(/\D/g,'').slice(0,4);
       if(regEl.value !== v) regEl.value = v;
       updateSubmitButtonState();
     });
     regEl.addEventListener("paste", e => {
       e.preventDefault();
-      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,3);
+      const text = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,4);
       document.execCommand('insertText', false, text);
       updateSubmitButtonState();
     });
